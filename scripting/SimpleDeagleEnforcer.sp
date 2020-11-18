@@ -14,29 +14,29 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-    HookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Post);
+  HookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Post);
 }
 
 
 public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	StripAllWeapons(client);
-	RequestFrame(SetWeapons, client);
+	RequestFrame(StripAllWeapons, client);
+	return Plugin_Handled;
 }
 
 public void SetWeapons(int client) 
 { 
-    if(IsValidClient(client) && IsPlayerAlive(client)) 
-    { 
-        if (GetPlayerWeaponSlot(client, 1) != -1)
-            GivePlayerItem(client, "weapon_deagle");
-        if (GetClientTeam(client) == 2)
-            GivePlayerItem(client, "weapon_knife_t");
-        else
-            GivePlayerItem(client, "weapon_knife");
-    }
-    return;
+	if(IsValidClient(client) && IsPlayerAlive(client)) 
+	{ 
+		PrintToChat(client, "Giving weapons now.");
+		GivePlayerItem(client, "weapon_deagle");
+		if (GetClientTeam(client) == 2)
+				GivePlayerItem(client, "weapon_knife_t");
+		else
+				GivePlayerItem(client, "weapon_knife");
+	}
+	return;
 } 
 
 
@@ -46,17 +46,17 @@ stock void StripAllWeapons(int client)
 		return;
 
 	int weapon;
-	for (int i; i < 4; i++) {
-
-		if ((weapon = GetPlayerWeaponSlot(client, i)) != -1) {
-
-			if (IsValidEntity(weapon)) {
-
-				RemovePlayerItem(client, weapon);
-				AcceptEntityInput(weapon, "Kill");
-			}
+	for (int i; i <= 4; i++) 
+	{
+		weapon = GetPlayerWeaponSlot(client, i);
+		PrintToChat(client, "Found a gun, removing %i", weapon);
+		if(weapon != -1) 
+		{
+		RemovePlayerItem(client, weapon);
+		AcceptEntityInput(weapon, "Kill");
 		}
 	}
+	RequestFrame(SetWeapons, client);
 }
 
 stock bool IsValidClient(int client, bool noBots=true) 
